@@ -20,6 +20,7 @@ def one_vs_all(X,y):
     parameters={}
 
     for i in range(number_of_classes):
+        print "iteration number ",i
         y_binary=np.array([1 if label == i else -1 for label in y])
         svm = SVM()
         svm.fit(X,y_binary)
@@ -31,6 +32,7 @@ def one_vs_all(X,y):
         parameters[i]['sv_y']=svm.sv_y
         parameters[i]['b']=svm.b
         parameters[i]['kernel']=svm.kernel
+        print "end of iteration number ",i
 
     return parameters
 

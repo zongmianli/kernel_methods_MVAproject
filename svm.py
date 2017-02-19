@@ -1,3 +1,9 @@
+# Mathieu Blondel, September 2010
+# License: BSD 3 clause
+# http://www.mblondel.org/journal/2010/09/19/support-vector-machines-in-python/
+
+
+
 import numpy as np
 from numpy import linalg
 import cvxopt
