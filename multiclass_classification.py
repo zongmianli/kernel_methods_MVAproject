@@ -8,11 +8,11 @@ def linear_kernel(x1, x2):
 def polynomial_kernel(x, y, p=3):
     return (1 + np.dot(x, y)) ** p
 
-def gaussian_kernel(x, y, sigma=5.0):
+def gaussian_kernel(x, y, sigma=2.0):
     return np.exp(-linalg.norm(x-y)**2 / (2 * (sigma ** 2)))
 
 
-def one_vs_all(X,y):
+def one_vs_all(X,y,kernel,C):
     number_of_classes=len(np.unique(y))
     #matrix containing the results of each classifier for each example
     decision_function=np.zeros((X.shape[0],number_of_classes))
@@ -20,9 +20,9 @@ def one_vs_all(X,y):
     parameters={}
 
     for i in range(number_of_classes):
-        print "iteration number ",i
+        print "kernel iteration number ",i
         y_binary=np.array([1 if label == i else -1 for label in y])
-        svm = SVM()
+        svm = SVM(kernel,C)
         svm.fit(X,y_binary)
         #get the parameters for each svm
         parameters[i]={}

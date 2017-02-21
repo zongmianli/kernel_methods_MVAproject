@@ -1,61 +1,59 @@
 import numpy as np
 from multiclass_classification import *
-
-
-# mean1 = np.array([0, 2])
-# mean2 = np.array([2, 0])
-# cov = np.array([[0.8, 0.6], [0.6, 0.8]])
-# X1 = np.random.multivariate_normal(mean1, cov, 100)
-# y1 = np.ones(len(X1))
-# X2 = np.random.multivariate_normal(mean2, cov, 100)
-# y2 = np.zeros(len(X2))
-# X1_train = X1[:90]
-# y1_train = y1[:90]
-# X2_train = X2[:90]
-# y2_train = y2[:90]
-# X_train = np.vstack((X1_train, X2_train))
-# y_train = np.hstack((y1_train, y2_train))
-#
-# parameters=one_vs_all(X_train,y_train)
-# #print parameters
-# number_of_classes=2
-# y_hat=predict_multiclass(X_train,number_of_classes,parameters)
-# correct = np.sum(y_hat == y_train)
-# print("%d out of %d predictions correct" % (correct, len(y_hat)))
-#
-#
-# #multivariate test
-# mean1 = np.array([0, 2])
-# cov = np.array([[0.8, 0.6], [0.6, 0.8]])
-# X1 = np.random.multivariate_normal(mean1, cov, 100)
-# y1 = np.random.randint(0,10,len(X1))
-# X1_train = X1[:90]
-# y1_train = y1[:90]
-# parameters=one_vs_all(X1_train,y1_train)
-# #print parameters
-# number_of_classes=10
-# y_hat=predict_multiclass(X1_train,number_of_classes,parameters)
-# correct = np.sum(y_hat == y1_train)
-# print("%d out of %d predictions correct" % (correct, len(y_hat)))
-
+from sklearn import preprocessing
 
 
 Xtr = np.genfromtxt ('Xtr.csv', delimiter=",")
 Ytr = np.genfromtxt ('Ytr.csv', delimiter=",",skip_header=1)
 Ytr=Ytr[:,1]
 Xtr=Xtr[:,:-1]
-#Xtr=Xtr[0:100,:]
-#Ytr=Ytr[0:100]
+
+Xtr = preprocessing.scale(Xtr)
 
 
 parameters=one_vs_all(Xtr,Ytr)
 #save the trained model
+'''
 np.save('parameters_linearSVM_fulltrain.npy', parameters)
 # Load the model
-#parameters = np.load('parameters_linearSVM_fulltrain.npy').item()
+parameters = np.load('parameters_linearSVM_fulltrain.npy').item()
+'''
 number_of_classes=10
 y_hat=predict_multiclass(Xtr,number_of_classes,parameters)
 correct = np.sum(y_hat == Ytr)
 acc=correct/float(len(y_hat))
 print("%d out of %d predictions correct" % (correct, len(y_hat)))
 print "Accuracy : ",acc
+
+
+
+
+#split the data and work on a test set for evaluation
+Ytr=np.array([Ytr])
+data=np.concatenate((Xtr,Ytr.T),axis=1)
+msk = np.random.rand(len(data)) < 0.8
+train = data[msk]
+test = data[~msk]
+Xtrain=train[:,:-1]
+Ytrain=train[:,-1]
+Xtest=test[:,:-1]
+Ytest=test[:,-1]
+parameters=one_vs_all(Xtrain,Ytrain,kernel=gaussian_kernel,C=10)
+number_of_classes=10
+y_hat=predict_multiclass(Xtest,number_of_classes,parameters)
+correct = np.sum(y_hat == Ytest)
+acc=correct/float(len(y_hat))
+print("%d out of %d predictions correct" % (correct, len(y_hat)))
+print "Accuracy : ",acc
+
+C_values=[0.0001,0.1,1,10,10000]
+accuracy_list=[]
+for i in C_values:
+    parameters=one_vs_all(Xtrain,Ytrain,kernel=linear_kernel,C=i)
+    number_of_classes=10
+    y_hat=predict_multiclass(Xtest,number_of_classes,parameters)
+    correct = np.sum(y_hat == Ytest)
+    acc=correct/float(len(y_hat))
+    print("%d out of %d predictions correct" % (correct, len(y_hat)))
+    print "Accuracy : ",acc
+    accuracy_list.append(acc)
